@@ -1,0 +1,188 @@
+name: Autograding Tests
+on:
+  - push
+  - workflow_dispatch
+  - repository_dispatch
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ===== Compile all questions =====
+      - name: Compile all
+        run: |
+          # Adjust filenames if your repos use different names
+          gcc hw4-1.c -o hw4-1
+          gcc hw4-2.c -o hw4-2
+          gcc hw4-3.c -lm -o hw4-3
+          gcc hw4-4.c -o hw4-4
+          gcc hw4-5.c -o hw4-5
+
+      # ========== hw4-1: Calculate mean ==========
+      - name: hw4-1 Test 1
+        id: hw41_t1
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-1 Test 1
+          command: "./hw4-1"
+          input: |
+            -10
+            -10
+            -20
+          expected-output: |
+            Average is -13
+          comparison-method: included
+          timeout: 10
+
+      - name: hw4-1 Test 2
+        id: hw41_t2
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-1 Test 2
+          command: "./hw4-1"
+          input: |
+            56
+            19
+            24
+          expected-output: |
+            Average is 33
+          comparison-method: included
+          timeout: 10
+
+      # ========== hw4-2: Positive / Negative ==========
+      - name: hw4-2 Test 1
+        id: hw42_t1
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-2 Test 1
+          command: "./hw4-2"
+          input: |
+            20
+          expected-output: |
+            Positive
+          comparison-method: included
+          timeout: 10
+
+      - name: hw4-2 Test 2
+        id: hw42_t2
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-2 Test 2
+          command: "./hw4-2"
+          input: |
+            -20
+          expected-output: |
+            Negative or zero
+          comparison-method: included
+          timeout: 10
+
+      # ========== hw4-3: Entropy ==========
+      # Expected output is the numeric entropy shown in slides
+      - name: hw4-3 Test 1
+        id: hw43_t1
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-3 Test 1
+          command: "./hw4-3"
+          input: |
+            0.3
+          expected-output: |
+            0.881291
+          comparison-method: included
+          timeout: 10
+
+      - name: hw4-3 Test 2
+        id: hw43_t2
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-3 Test 2
+          command: "./hw4-3"
+          input: |
+            0.878
+          expected-output: |
+            0.535083
+          comparison-method: included
+          timeout: 10
+
+      # ========== hw4-4: Larger of two integers ==========
+      - name: hw4-4 Test 1
+        id: hw44_t1
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-4 Test 1
+          command: "./hw4-4"
+          input: |
+            10
+            20
+          expected-output: |
+            20
+          comparison-method: included
+          timeout: 10
+
+      - name: hw4-4 Test 2
+        id: hw44_t2
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-4 Test 2
+          command: "./hw4-4"
+          input: |
+            -10
+            -15
+          expected-output: |
+            -10
+          comparison-method: included
+          timeout: 10
+
+      # ========== hw4-5: Meal advice ==========
+      - name: hw4-5 Test 1
+        id: hw45_t1
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-5 Test 1
+          command: "./hw4-5"
+          input: |
+            165
+            65
+          expected-output: |
+            Ideal weight = 59.895000
+            Let's reduce sweets
+          comparison-method: included
+          timeout: 10
+
+      - name: hw4-5 Test 2
+        id: hw45_t2
+        uses: classroom-resources/autograding-io-grader@v1
+        with:
+          test-name: hw4-5 Test 2
+          command: "./hw4-5"
+          input: |
+            180
+            69
+          expected-output: |
+            Ideal weight = 71.280000
+            Go for it
+          comparison-method: included
+          timeout: 10
+
+      # ===== Report all results back to GitHub Classroom =====
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          HW41_T1_RESULTS: "${{ steps.hw41_t1.outputs.result }}"
+          HW41_T2_RESULTS: "${{ steps.hw41_t2.outputs.result }}"
+          HW42_T1_RESULTS: "${{ steps.hw42_t1.outputs.result }}"
+          HW42_T2_RESULTS: "${{ steps.hw42_t2.outputs.result }}"
+          HW43_T1_RESULTS: "${{ steps.hw43_t1.outputs.result }}"
+          HW43_T2_RESULTS: "${{ steps.hw43_t2.outputs.result }}"
+          HW44_T1_RESULTS: "${{ steps.hw44_t1.outputs.result }}"
+          HW44_T2_RESULTS: "${{ steps.hw44_t2.outputs.result }}"
+          HW45_T1_RESULTS: "${{ steps.hw45_t1_
